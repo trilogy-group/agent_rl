@@ -20,7 +20,6 @@ def search_tool(query: str) -> list:
         A list containing the search results data.
     """
     search_result = app.search(query, limit=5)
-    print("Search result: ", search_result.data)
     return search_result.data
 
 search_tool_node = ToolNode([search_tool])
