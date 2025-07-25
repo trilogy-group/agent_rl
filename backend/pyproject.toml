@@ -1,23 +1,28 @@
-[project]
+[tool.poetry]
 name = "agent-rl"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "Praveen Koka",email = "praveen.koka@trilogy.com"}
-]
-license = {text = "MIT"}
+description = "Agent RL Backend Server"
+authors = ["Praveen Koka <praveen.koka@trilogy.com>"]
+license = "MIT"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "pandas (>=2.3.1,<3.0.0)",
-    "openai (>=1.97.1,<2.0.0)",
-    "google-genai (>=1.27.0,<2.0.0)",
-    "python-dotenv (>=1.1.1,<2.0.0)",
-    "langgraph (>=0.5.4,<0.6.0)",
-    "fastapi (>=0.110.0,<1.0.0)",
-    "uvicorn (>=0.28.0,<1.0.0)",
-    "langchain-openai (>=0.1.0,<1.0.0)"
-]
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pandas = "^2.3.1"
+openai = "^1.97.1"
+google-genai = "^1.27.0"
+python-dotenv = "^1.1.1"
+langgraph = "^0.5.4"
+fastapi = "^0.110.0"
+uvicorn = "^0.28.0"
+langchain-openai = "^0.2.0"
+langchain-core = "^0.3.22"
+langgraph-sdk = "^0.1.0"
+langchain = "^0.3.27"
+ipython = "^9.4.0"
+firecrawl = "^2.16.2"
+langgraph-checkpoint-sqlite = "^2.0.10"
 
 
 [build-system]
