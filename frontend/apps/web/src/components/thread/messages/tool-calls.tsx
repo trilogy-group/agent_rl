@@ -136,7 +136,7 @@ export function ToolResult({ message }: { message: ToolMessage }) {
                       ? isExpanded
                         ? parsedContent
                         : parsedContent.slice(0, 5)
-                      : Object.entries(parsedContent)
+                      : Object.entries?.(parsedContent||{})
                     ).map((item, argIdx) => {
                       const [key, value] = Array.isArray(parsedContent)
                         ? [argIdx, item]
