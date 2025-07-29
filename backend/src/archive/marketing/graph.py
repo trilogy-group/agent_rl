@@ -1,7 +1,7 @@
 from typing import Annotated
 from typing_extensions import TypedDict
 from src.agent.llm import llm
-from langgraph.graph import StateGraph, START
+from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langchain_core.messages import ToolMessage, SystemMessage, AIMessage, HumanMessage
 from langgraph.prebuilt import ToolNode, tools_condition
@@ -20,11 +20,12 @@ from datetime import datetime
 # State schema
 # -----------------------
 class State(TypedDict):
-    messages: Annotated[list, add_messages]
+    messages: Annotated[list, add_messages]   # only messages use add_messages
     brand_guidelines: str
-    latest_news: list[dict]
+    latest_news: list[dict]                   # plain, no Annotated
     upcoming_events: list[dict]
     user_query: str
+    tweets: list[str]
 
 builder = StateGraph(State)
 
@@ -53,24 +54,43 @@ tools = [
     generate_brand_campaign_ideas,
     generate_tweets
 ]
-llm_tools = llm.bind_tools(tools)
+# llm_tools = llm.bind_tools(tools)
+
+# -----------------------
+# Debug tracer
+# -----------------------
+def trace_node(name):
+    def wrapper(fn):
+        def inner(state):
+            print(f"🚀 Entering node: {name}")
+            print("STATE:", {k: v for k, v in state.items() if k != "messages"})
+            return fn(state)
+        return inner
+    return wrapper
 
 # -----------------------
 # Chatbot node
 # -----------------------
+@trace_node("chatbot")
 def chatbot_node(state: State) -> dict: 
     msgs = state.get('messages', [])
-    if not msgs or not isinstance(msgs[0], SystemMessage):
-        msgs = [SystemMessage(content=SYSTEM_PROMPT)] + msgs
 
-    # Capture latest user query immediately
-    last_user = next((m for m in reversed(msgs) if isinstance(m, HumanMessage)), None)
-    user_q = last_user.content if last_user else state.get("user_query", "")
+    # Lock user query once
+    if not state.get("user_query"):
+        last_user = next((m for m in reversed(msgs) if isinstance(m, HumanMessage)), None)
+        user_q = last_user.content if last_user else ""
+    else:
+        user_q = state["user_query"]
 
-    assistant_msg = llm_tools.invoke(msgs)
+    # System prompt used internally, not added to state
+    input_msgs = [SystemMessage(content=SYSTEM_PROMPT)] + msgs
+
+    assistant_msg = llm.invoke(input_msgs)
+
     return {
-        'messages': [assistant_msg],
-        'user_query': user_q  # <-- ensures routing sees it
+        **state,
+        'messages': msgs + [assistant_msg],  # only user-facing msgs + AI response
+        'user_query': user_q
     }
 
 builder.add_node('chatbot', chatbot_node)
@@ -78,14 +98,15 @@ builder.add_node('chatbot', chatbot_node)
 # -----------------------
 # Fetch latest news
 # -----------------------
+@trace_node("fetch_news")
 def fetch_news_node(state: State) -> dict:
-    if not state.get('user_query'):
-        return {'latest_news': []}
-    news = get_latest_news_for_brand.invoke({
-        'user_query': state['user_query'],
-        'brand_guidelines': state.get('brand_guidelines', ''),
-        'limit': 3,
-    })
+    news = []
+    if state.get('user_query'):
+        news = get_latest_news_for_brand.invoke({
+            'user_query': state['user_query'],
+            'brand_guidelines': state.get('brand_guidelines', ''),
+            'limit': 3,
+        })
     return {'latest_news': news}
 
 builder.add_node('fetch_news', fetch_news_node)
@@ -93,6 +114,7 @@ builder.add_node('fetch_news', fetch_news_node)
 # -----------------------
 # Fetch upcoming events
 # -----------------------
+@trace_node("fetch_events")
 def fetch_events_node(state: State) -> dict:
     events = get_upcoming_events_tool.invoke({})
     return {'upcoming_events': events}
@@ -102,14 +124,8 @@ builder.add_node('fetch_events', fetch_events_node)
 # -----------------------
 # Generate tweets
 # -----------------------
+@trace_node("generate_tweets")
 def generate_tweets_node(state: State) -> dict:
-    print("Generating tweets")
-    print("************************************************")
-    print("STATE DEBUG:")
-    print(state.get('latest_news', [])[0], len(state.get('latest_news', [])))
-    print(state.get('upcoming_events', [])[0], len(state.get('upcoming_events', [])))
-    print("************************************************")
-
     tweets = generate_tweets.invoke({
         'user_query': state.get('user_query', ''),
         'brand_guidelines': state.get('brand_guidelines', ''),
@@ -117,7 +133,7 @@ def generate_tweets_node(state: State) -> dict:
         'upcoming_events': state.get('upcoming_events', []),
         'limit': 5,
     })
-    return {'messages': [AIMessage(content=f'Generated tweets: {tweets}')]} 
+    return {'tweets': tweets}
 
 builder.add_node('generate_tweets', generate_tweets_node)
 
@@ -127,13 +143,21 @@ builder.add_node('generate_tweets', generate_tweets_node)
 builder.add_node('tools', ToolNode(tools=tools))
 
 # -----------------------
+# End node
+# -----------------------
+@trace_node("end")
+def end_node(state: State) -> dict:
+    return state
+
+builder.add_node('end', end_node)
+
+# -----------------------
 # Routing logic
 # -----------------------
-
-
 def should_fetch(state: State):
-    uq = state.get('user_query', '').lower()
-    if 'tweet' in uq:
+    uq = (state.get('user_query') or "").lower()
+    print("🧐 should_fetch evaluating:", uq)
+    if "tweet" in uq:
         if not state.get('latest_news'):
             return 'fetch_news'
         if not state.get('upcoming_events'):
@@ -141,43 +165,37 @@ def should_fetch(state: State):
         return 'generate_tweets'
     return 'chatbot'
 
+builder.add_edge(START, 'chatbot')
+
 # -----------------------
 # Conditional edges
 # -----------------------
+
+
 builder.add_conditional_edges(
-    START,
+    'chatbot',
     should_fetch,
-    {
-        'fetch_news': 'fetch_news',
-        'fetch_events': 'fetch_events',
-        'generate_tweets': 'generate_tweets',
-        'chatbot': 'chatbot'
-    }
 )
 
 builder.add_conditional_edges(
     'fetch_news',
     should_fetch,
-    {
-        'fetch_events': 'fetch_events',
-        'generate_tweets': 'generate_tweets',
-        'chatbot': 'chatbot'
-    }
 )
-
 builder.add_conditional_edges(
     'fetch_events',
     should_fetch,
-    {
-        'generate_tweets': 'generate_tweets',
-        'chatbot': 'chatbot',
-        'fetch_news': 'fetch_news'
-    }
 )
 
+builder.add_conditional_edges(
+    'generate_tweets',
+    should_fetch,
+)
+
+builder.add_edge('fetch_news', 'chatbot')
+builder.add_edge('fetch_events', 'chatbot')
 builder.add_edge('generate_tweets', 'chatbot')
-builder.add_conditional_edges('chatbot', tools_condition)
-builder.add_edge('tools', 'chatbot')
+
+builder.add_edge('chatbot', END)
 
 # -----------------------
 # Persist graph

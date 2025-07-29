@@ -111,16 +111,85 @@ def generate_tweets_with_state(state: State):
     return {"messages": [AIMessage(content=f"Generated tweets: {tweets}")]}
 
 graph_builder.add_node("chatbot", chatbot)
+graph_builder.add_node("fetch_news", fetch_news_node)
+graph_builder.add_node("fetch_events", fetch_events_node)
+graph_builder.add_node("generate_tweets", generate_tweets_with_state)
 
 tool_node = ToolNode(tools=tools)
 graph_builder.add_node("tools", tool_node)
 
+def should_fetch_data(state: State):
+    """Determine if we need to fetch news and events data"""
+    messages = state.get("messages", [])
+    if not messages:
+        return "chatbot"
+    
+    last_message = messages[-1].content.lower() if messages else ""
+    
+    # Check if user is asking for tweets and we don't have the required data
+    if ("tweet" in last_message or "social media" in last_message) and not state.get("latest_news"):
+        return "fetch_news"
+    
+    return "chatbot"
+
+def after_fetch_news(state: State):
+    """After fetching news, decide next step"""
+    last_message = state.get("messages", [])[-1].content.lower() if state.get("messages") else ""
+    
+    if "tweet" in last_message or "social media" in last_message:
+        return "fetch_events"
+    
+    return "chatbot"
+
+def after_fetch_events(state: State):
+    """After fetching events, decide next step"""
+    last_message = state.get("messages", [])[-1].content.lower() if state.get("messages") else ""
+    
+    if "tweet" in last_message or "social media" in last_message:
+        return "generate_tweets"
+    
+    return "chatbot"
+
+# Add conditional routing from start
+graph_builder.add_conditional_edges(
+    START,
+    should_fetch_data,
+    {
+        "fetch_news": "fetch_news",
+        "chatbot": "chatbot"
+    }
+)
+
+# Add routing after fetch_news
+graph_builder.add_conditional_edges(
+    "fetch_news",
+    after_fetch_news,
+    {
+        "fetch_events": "fetch_events",
+        "chatbot": "chatbot"
+    }
+)
+
+# Add routing after fetch_events
+graph_builder.add_conditional_edges(
+    "fetch_events",
+    after_fetch_events,
+    {
+        "generate_tweets": "generate_tweets",
+        "chatbot": "chatbot"
+    }
+)
+
+# After generating tweets, go to chatbot
+graph_builder.add_edge("generate_tweets", "chatbot")
+
+# Original chatbot flow
 graph_builder.add_conditional_edges(
     "chatbot",
     tools_condition,
 )
+# Any time a tool is called, we return to the chatbot to decide the next step
 graph_builder.add_edge("tools", "chatbot")
-graph_builder.add_edge(START, "chatbot")
 
 
 memory = SqliteSaver.from_conn_string("graph.db")
