@@ -1,0 +1,76 @@
+max_iterations: 20
+random_seed: 42
+checkpoint_interval: 5
+llm:
+  models:
+  - name: gpt-4o
+    weight: 1.0
+  temperature: 0.8
+database:
+  population_size: 750
+  num_islands: 3
+  migration_interval: 25
+  feature_dimensions:
+  - engagement
+  - relevance
+  - authenticity
+  - clarity
+  feature_bins: 12
+evaluator:
+  enable_artifacts: true
+  cascade_evaluation: true
+  use_llm_feedback: true
+prompt:
+  system_message: 'You are an expert Python developer optimizing agent tools through
+    evolutionary programming. Your task is to improve the tool''s code and prompts
+    to maximize performance on the evaluation metrics.
+
+
+    You are optimizing the generate_essay tool code. Focus on improving:
+
+
+    CODE OPTIMIZATION PRIORITIES:
+
+    - Enhance prompt engineering for better content quality
+
+    - Improve LLM interaction patterns for more engaging output
+
+    - Optimize text generation logic for professional tone
+
+    - Refine content structure and formatting algorithms
+
+    - Enhance context understanding and response relevance
+
+
+    PROMPT OPTIMIZATION FOCUS:
+
+    - Craft prompts that generate more engaging content
+
+    - Include instructions for professional tone and authenticity
+
+    - Add context-awareness to prompts for better relevance
+
+    - Optimize prompt structure for coherent, creative output
+
+    - Include specific formatting and style guidelines
+
+
+    EVALUATION METRICS TO OPTIMIZE FOR:
+
+    - Engagement
+
+    - Relevance
+
+    - Authenticity
+
+    - Clarity
+
+
+    Modify the tool''s implementation, prompts, and logic to score higher on these
+    specific evaluation metrics. Focus on prompt engineering improvements that directly
+    impact the measured quality dimensions.'
+  num_top_programs: 3
+  num_diverse_programs: 2
+  include_artifacts: true
+  max_artifact_bytes: 4096
+  artifact_security_filter: true

@@ -6,8 +6,9 @@ This script runs OpenEvolve for a selected tool directory using its
 openevolve_config.yaml configuration and evaluator.py.
 
 Usage:
-    python run_openevolve.py <tool_directory>
+    python run_openevolve.py <tool_directory> [--checkpoint <checkpoint_number>]
     python run_openevolve.py evolution/tools/reflect_on_draft
+    python run_openevolve.py evolution/tools/reflect_on_draft --checkpoint 10
 """
 
 import os
@@ -18,7 +19,7 @@ import yaml
 from openevolve import OpenEvolve
 
 
-async def run_openevolve_for_tool(tool_dir: str):
+async def run_openevolve_for_tool(tool_dir: str, checkpoint: int = None):
     """Run OpenEvolve for a specific tool directory using Python API"""
     tool_path = Path(tool_dir)
     
@@ -33,7 +34,7 @@ async def run_openevolve_for_tool(tool_dir: str):
     
     # Check for required files
     required_files = {
-        'tool.py': tool_path / 'tool.py',
+        'evolve_target.py': tool_path / 'evolve_target.py',
         'evaluator.py': tool_path / 'evaluator.py', 
         'openevolve_config.yaml': tool_path / 'openevolve_config.yaml',
         'training_data.json': tool_path / 'training_data.json'
@@ -88,7 +89,7 @@ async def run_openevolve_for_tool(tool_dir: str):
     print("=" * 60)
     
     # Get absolute paths for OpenEvolve
-    tool_file = str(required_files['tool.py'].absolute())
+    tool_file = str(required_files['evolve_target.py'].absolute())
     evaluator_file = str(required_files['evaluator.py'].absolute())
     config_file_path = str(config_file.absolute())
     
@@ -112,8 +113,29 @@ async def run_openevolve_for_tool(tool_dir: str):
         print("Press Ctrl+C to interrupt if needed.")
         print()
         
-        # Run evolution
-        best_program = await evolve.run(iterations=max_iterations)
+        # Run evolution with optional checkpoint
+        if checkpoint is not None:
+            # Build checkpoint path
+            checkpoint_dir = tool_path / "openevolve_output" / "checkpoints" / f"checkpoint_{checkpoint}"
+            if checkpoint_dir.exists():
+                print(f"🔄 Resuming from checkpoint {checkpoint} at {checkpoint_dir}...")
+                best_program = await evolve.run(
+                    iterations=max_iterations,
+                    checkpoint_path=str(checkpoint_dir)
+                )
+            else:
+                print(f"❌ Error: Checkpoint {checkpoint} not found at {checkpoint_dir}")
+                print(f"Available checkpoints:")
+                checkpoints_dir = tool_path / "openevolve_output" / "checkpoints"
+                if checkpoints_dir.exists():
+                    for cp in sorted(checkpoints_dir.iterdir()):
+                        if cp.is_dir() and cp.name.startswith("checkpoint_"):
+                            print(f"  - {cp.name}")
+                else:
+                    print("  No checkpoints found")
+                return False
+        else:
+            best_program = await evolve.run(iterations=max_iterations)
         
         print(f"\n✅ OpenEvolve completed successfully for {tool_name}!")
         print(f"🏆 Best program generated and saved.")
@@ -151,7 +173,7 @@ def list_available_tools(tools_base_dir: str = "evolution/tools"):
             continue
             
         # Check for required files
-        has_tool = (item / 'tool.py').exists()
+        has_tool = (item / 'evolve_target.py').exists()
         has_evaluator = (item / 'evaluator.py').exists()
         has_config = (item / 'openevolve_config.yaml').exists()
         has_data = (item / 'training_data.json').exists()
@@ -159,7 +181,7 @@ def list_available_tools(tools_base_dir: str = "evolution/tools"):
         status = "✅" if all([has_tool, has_evaluator, has_config, has_data]) else "❌"
         missing = []
         
-        if not has_tool: missing.append('tool.py')
+        if not has_tool: missing.append('evolve_target.py')
         if not has_evaluator: missing.append('evaluator.py') 
         if not has_config: missing.append('config.yaml')
         if not has_data: missing.append('training_data.json')
@@ -180,10 +202,11 @@ async def main():
         print("OpenEvolve Runner - Evolutionary optimization for agent tools")
         print("=" * 60)
         print("\nUsage:")
-        print("  python run_openevolve.py <tool_directory>")
+        print("  python run_openevolve.py <tool_directory> [--checkpoint <number>]")
         print("\nExamples:")
         print("  python run_openevolve.py evolution/tools/reflect_on_draft")
         print("  python run_openevolve.py evolution/tools/generate_brand_guidelines")
+        print("  python run_openevolve.py evolution/tools/reflect_on_draft --checkpoint 10")
         
         # List available tools
         available_tools = list_available_tools()
@@ -200,15 +223,39 @@ async def main():
         
         return
     
-    if len(sys.argv) != 2:
-        print("Error: Please provide exactly one tool directory")
-        print("Usage: python run_openevolve.py <tool_directory>")
+    # Parse arguments
+    tool_directory = None
+    checkpoint = None
+    
+    i = 1
+    while i < len(sys.argv):
+        if sys.argv[i] == '--checkpoint':
+            if i + 1 < len(sys.argv):
+                try:
+                    checkpoint = int(sys.argv[i + 1])
+                    i += 2
+                except ValueError:
+                    print("Error: Checkpoint must be a number")
+                    sys.exit(1)
+            else:
+                print("Error: --checkpoint requires a number")
+                sys.exit(1)
+        else:
+            if tool_directory is None:
+                tool_directory = sys.argv[i]
+                i += 1
+            else:
+                print("Error: Multiple tool directories specified")
+                print("Usage: python run_openevolve.py <tool_directory> [--checkpoint <number>]")
+                sys.exit(1)
+    
+    if tool_directory is None:
+        print("Error: Please provide a tool directory")
+        print("Usage: python run_openevolve.py <tool_directory> [--checkpoint <number>]")
         sys.exit(1)
     
-    tool_directory = sys.argv[1]
-    
     # Run OpenEvolve for the specified tool
-    success = await run_openevolve_for_tool(tool_directory)
+    success = await run_openevolve_for_tool(tool_directory, checkpoint)
     
     if not success:
         sys.exit(1)

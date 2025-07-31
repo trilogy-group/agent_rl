@@ -333,7 +333,7 @@ class DecoratedToolExtractor:
         tool_dir.mkdir(exist_ok=True)
         
         # Save tool source code
-        tool_file = tool_dir / "tool.py"
+        tool_file = tool_dir / "evolve_target.py"
         
         # Generate standalone tool code
         if tool_info.get('is_method'):
@@ -382,7 +382,9 @@ Extracted from: {Path(tool_info['source_file']).name}
 
 {dependencies}
 
+
 {tool_info['source_code']}
+
 
 if __name__ == "__main__":
     # Test the tool here
@@ -407,7 +409,6 @@ Class method: {tool_info['class_name']}.{tool_info['method_name']}
 
 {tool_info['class_source']}
 
-# Create a convenience function that instantiates the class and calls the method
 def {tool_info['name']}(*args, **kwargs):
     """Wrapper function for the class method"""
     instance = {tool_info['class_name']}()
@@ -440,14 +441,14 @@ if __name__ == "__main__":
         return '\n'.join(imports)
     
     def _extract_dependencies(self, file_path: str, function_name: str) -> str:
-        """Extract constants, variables, and other dependencies needed by the function"""
+        """Extract constants, variables, and helper functions needed by the function"""
         with open(file_path, 'r') as f:
             source = f.read()
         
         tree = ast.parse(source)
         lines = source.split('\n')
         
-        # Find the function to analyze its dependencies
+        # Find the target function to analyze its dependencies
         func_node = None
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef) and node.name == function_name.split('.')[-1]:
@@ -457,10 +458,11 @@ if __name__ == "__main__":
         if not func_node:
             return ""
         
-        # Extract ALL names referenced in the function (not just variables)
+        # Extract ALL names referenced in the function (variables AND function calls)
         referenced_names = set()
+        called_functions = set()
         
-        class NameCollector(ast.NodeVisitor):
+        class DependencyCollector(ast.NodeVisitor):
             def visit_Name(self, node):
                 if isinstance(node.ctx, ast.Load):
                     referenced_names.add(node.id)
@@ -471,80 +473,123 @@ if __name__ == "__main__":
                 if isinstance(node.value, ast.Name):
                     referenced_names.add(node.value.id)
                 self.generic_visit(node)
+            
+            def visit_Call(self, node):
+                # Capture function calls
+                if isinstance(node.func, ast.Name):
+                    called_functions.add(node.func.id)
+                elif isinstance(node.func, ast.Attribute):
+                    # For obj.method() calls, we might need the obj
+                    if isinstance(node.func.value, ast.Name):
+                        referenced_names.add(node.func.value.id)
+                self.generic_visit(node)
         
-        collector = NameCollector()
+        collector = DependencyCollector()
         collector.visit(func_node)
         
         # Remove function parameters and Python builtins
         param_names = {arg.arg for arg in func_node.args.args}
         referenced_names -= param_names
-        builtins = {'len', 'str', 'int', 'float', 'bool', 'list', 'dict', 'set', 'tuple', 'range', 'enumerate', 'zip', 'print', 'f', 'join'}
+        called_functions -= param_names
+        
+        builtins = {'len', 'str', 'int', 'float', 'bool', 'list', 'dict', 'set', 'tuple', 'range', 'enumerate', 'zip', 'print', 'max', 'min', 'sum', 'abs', 'round'}
         referenced_names -= builtins
+        called_functions -= builtins
+        
+        # Combine all referenced items
+        all_referenced = referenced_names | called_functions
         
         print(f"DEBUG: Function {function_name} references: {referenced_names}")
+        print(f"DEBUG: Function {function_name} calls: {called_functions}")
         
         dependencies = []
         
         # Always add load_dotenv if we use environment variables
-        if any(name in referenced_names for name in ['os', 'load_dotenv']) or 'environ' in source:
+        if any(name in all_referenced for name in ['os', 'load_dotenv']) or 'environ' in source:
             dependencies.append("load_dotenv()")
         
         # Add logger setup if referenced
-        if 'logger' in referenced_names:
+        if 'logger' in all_referenced:
             dependencies.append("logger = logging.getLogger(__name__)")
         
         # Add model setup if referenced
-        if 'model' in referenced_names:
+        if 'model' in all_referenced:
             dependencies.append('model = ChatOpenAI(model="gpt-4o", temperature=0.2)')
         
         # Add tavily setup if referenced  
-        if 'tavily' in referenced_names:
+        if 'tavily' in all_referenced:
             dependencies.append('tavily = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])')
         
-        # Now find ALL module-level assignments that are referenced
-        module_assignments = {}
+        # Find ALL module-level definitions (assignments AND functions)
+        module_definitions = {}
         for node in tree.body:
             if isinstance(node, ast.Assign):
+                # Variable assignments
                 for target in node.targets:
                     if isinstance(target, ast.Name):
-                        module_assignments[target.id] = node
+                        module_definitions[target.id] = node
+            elif isinstance(node, ast.FunctionDef):
+                # Function definitions (but not the main function we're extracting)
+                if node.name != function_name.split('.')[-1]:
+                    module_definitions[node.name] = node
         
-        # Extract assignments for referenced names
-        for name in referenced_names:
-            if name in module_assignments and name not in ['logger', 'model', 'tavily']:
-                node = module_assignments[name]
+        # Extract dependencies for all referenced names
+        extracted_names = set()
+        
+        def extract_dependency(name, depth=0):
+            """Recursively extract dependencies"""
+            if name in extracted_names or depth > 5:  # Prevent infinite recursion
+                return
+            
+            if name in module_definitions and name not in ['logger', 'model', 'tavily']:
+                node = module_definitions[name]
+                extracted_names.add(name)
                 
-                # Use ast.get_source_segment first, fallback to manual extraction
+                # Extract the source code
                 try:
                     dep_code = ast.get_source_segment(source, node)
                     if dep_code:
                         dependencies.append(dep_code)
                         print(f"DEBUG: Extracted via ast.get_source_segment: {name}")
-                        continue
+                    else:
+                        raise Exception("ast.get_source_segment failed")
                 except:
-                    pass
+                    # Manual extraction fallback
+                    start_line = node.lineno - 1
+                    end_line = node.end_lineno if hasattr(node, 'end_lineno') else start_line + 1
+                    
+                    # For string constants, find the actual end
+                    if isinstance(node, ast.Assign) and isinstance(node.value, (ast.Constant, ast.Str)):
+                        line_text = lines[start_line]
+                        if '"""' in line_text:
+                            quote_count = line_text.count('"""')
+                            if quote_count == 1:  # Opening """ only
+                                for i in range(start_line + 1, len(lines)):
+                                    if '"""' in lines[i]:
+                                        end_line = i + 1
+                                        break
+                    
+                    dep_code = '\n'.join(lines[start_line:end_line])
+                    if dep_code and dep_code.strip():
+                        dependencies.append(dep_code)
+                        print(f"DEBUG: Extracted manually: {name}")
                 
-                # Manual extraction for complex multi-line assignments
-                start_line = node.lineno - 1
-                end_line = node.end_lineno if hasattr(node, 'end_lineno') else start_line + 1
-                
-                # For string constants, find the actual end
-                if isinstance(node.value, (ast.Constant, ast.Str)):
-                    # Search for the closing triple quotes
-                    line_text = lines[start_line]
-                    if '"""' in line_text:
-                        # Multi-line string - find closing """
-                        quote_count = line_text.count('"""')
-                        if quote_count == 1:  # Opening """ only
-                            for i in range(start_line + 1, len(lines)):
-                                if '"""' in lines[i]:
-                                    end_line = i + 1
-                                    break
-                
-                dep_code = '\n'.join(lines[start_line:end_line])
-                if dep_code and dep_code.strip():
-                    dependencies.append(dep_code)
-                    print(f"DEBUG: Extracted manually: {name}")
+                # If this is a function, check what it references
+                if isinstance(node, ast.FunctionDef):
+                    func_collector = DependencyCollector()
+                    func_collector.visit(node)
+                    
+                    # Recursively extract dependencies of this function
+                    func_references = func_collector.referenced_names | func_collector.called_functions
+                    func_references -= {arg.arg for arg in node.args.args}  # Remove its parameters
+                    func_references -= builtins
+                    
+                    for ref_name in func_references:
+                        extract_dependency(ref_name, depth + 1)
+        
+        # Extract all dependencies
+        for name in all_referenced:
+            extract_dependency(name)
         
         result = '\n\n'.join(dependencies)
         print(f"DEBUG: Final dependencies:\n{result}")

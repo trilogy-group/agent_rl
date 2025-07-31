@@ -47,12 +47,12 @@ class OpenEvolveConfigGenerator:
         print(f"Configs saved alongside each tool in their respective directories")
     
     def _find_tool_directories(self) -> List[Path]:
-        """Find all tool directories that have both tool.py and evaluator.py"""
+        """Find all tool directories that have both evolve_target.py and evaluator.py"""
         tool_dirs = []
         
         for item in self.tools_dir.iterdir():
             if item.is_dir():
-                tool_file = item / "tool.py"
+                tool_file = item / "evolve_target.py"
                 evaluator_file = item / "evaluator.py"
                 
                 if tool_file.exists() and evaluator_file.exists():
@@ -78,7 +78,7 @@ class OpenEvolveConfigGenerator:
     
     def _analyze_tool_category(self, tool_dir: Path) -> str:
         """Analyze tool source code to determine category"""
-        tool_file = tool_dir / "tool.py"
+        tool_file = tool_dir / "evolve_target.py"
         
         try:
             with open(tool_file, 'r') as f:
@@ -103,49 +103,52 @@ class OpenEvolveConfigGenerator:
             return "utility"
     
     def _extract_evaluator_metrics(self, tool_dir: Path) -> List[str]:
-        """Extract metrics from evaluator.py by looking for return dictionary keys"""
+        """Extract metrics from EVALUATION_METRICS variable in evaluator code"""
         evaluator_file = tool_dir / "evaluator.py"
         
         try:
             with open(evaluator_file, 'r') as f:
                 evaluator_code = f.read()
             
-            # Look for return dictionary patterns
-            metrics = []
-            
-            # Look for return dictionary with specific keys
             import re
             
-            # Pattern 1: return {"key1": value, "key2": value}
-            return_dict_pattern = r'return\s*\{\s*([^}]+)\}'
-            matches = re.findall(return_dict_pattern, evaluator_code, re.DOTALL)
+            # Look for EVALUATION_METRICS = [...] pattern (new approach)
+            metrics_pattern = r'EVALUATION_METRICS\s*=\s*\[([^\]]+)\]'
+            metrics_match = re.search(metrics_pattern, evaluator_code)
             
-            for match in matches:
-                # Extract quoted keys from the dictionary
-                key_matches = re.findall(r'"([^"]+)"\s*:', match)
-                metrics.extend(key_matches)
+            if metrics_match:
+                # Extract the content inside the brackets
+                metrics_content = metrics_match.group(1)
+                # Find all quoted strings (metric names) - try both single and double quotes
+                metric_matches = re.findall(r"'([^']+)'", metrics_content)
+                if not metric_matches:
+                    metric_matches = re.findall(r'"([^"]+)"', metrics_content)
+                if metric_matches:
+                    print(f"    Found EVALUATION_METRICS: {metric_matches}")
+                    return metric_matches[:4]  # Limit to 4 for MAP-Elites
             
-            # Pattern 2: Look for metrics defined in variables
-            metrics_var_pattern = r'(\w+)\s*=\s*\[([^\]]+)\]'
-            var_matches = re.findall(metrics_var_pattern, evaluator_code)
+            # Fallback: Look for old METRICS = [...] pattern
+            metrics_pattern_old = r'METRICS\s*=\s*\[([^\]]+)\]'
+            metrics_match_old = re.search(metrics_pattern_old, evaluator_code)
             
-            for var_name, var_content in var_matches:
-                if 'metric' in var_name.lower():
-                    var_keys = re.findall(r'"([^"]+)"', var_content)
-                    metrics.extend(var_keys)
+            if metrics_match_old:
+                # Extract the content inside the brackets
+                metrics_content = metrics_match_old.group(1)
+                # Find all quoted strings (metric names) - try both single and double quotes
+                metric_matches = re.findall(r"'([^']+)'", metrics_content)
+                if not metric_matches:
+                    metric_matches = re.findall(r'"([^"]+)"', metrics_content)
+                if metric_matches:
+                    print(f"    Found METRICS: {metric_matches}")
+                    return metric_matches[:4]  # Limit to 4 for MAP-Elites
             
-            # Remove duplicates and filter out non-metric keys
-            unique_metrics = []
-            exclude_keys = ['combined_score', 'error', 'num_test_cases', 'evaluation_successful', 'metrics_evaluated', 'tool_category']
+            # Final fallback
+            print(f"    No metrics variable found, using defaults")
+            return ['quality', 'relevance', 'usefulness', 'clarity']
             
-            for metric in metrics:
-                if metric not in exclude_keys and metric not in unique_metrics:
-                    unique_metrics.append(metric)
-            
-            return unique_metrics[:5] if unique_metrics else ['output_quality', 'usefulness', 'accuracy', 'completeness', 'relevance']
-            
-        except Exception:
-            return ['output_quality', 'usefulness', 'accuracy', 'completeness', 'relevance']
+        except Exception as e:
+            print(f"    Warning: Could not extract metrics from evaluator: {e}")
+            return ['quality', 'relevance', 'usefulness', 'clarity']
     
     def _create_config_structure(self, tool_name: str, tool_category: str, metrics: List[str]) -> Dict[str, Any]:
         """Create OpenEvolve configuration structure for the tool"""
@@ -418,8 +421,13 @@ def main():
     
     tools_directory = sys.argv[1] if len(sys.argv) == 2 else "evolution/tools"
     
-    generator = OpenEvolveConfigGenerator(tools_directory)
-    generator.generate_configs()
+    try:
+        generator = OpenEvolveConfigGenerator(tools_directory)
+        generator.generate_configs()
+    except Exception as e:
+        print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ from firecrawl import FirecrawlApp
 from dotenv import load_dotenv
 from langgraph.prebuilt import ToolNode
 from langchain_core.tools import tool
+from evolution.decorators import evolve
 
 import pandas as pd
 import yfinance as yf
@@ -167,6 +168,7 @@ def calculate_sortino_ratio(returns, risk_free_rate=0.02, target_return=0):
     downside_deviation = np.sqrt(np.mean(downside_returns**2))
     return np.sqrt(252) * excess_returns.mean() / downside_deviation
 
+@evolve()
 @tool
 def get_technical_analysis(ticker: str, period: str = "1mo") -> pd.DataFrame:
     """Perform technical analysis on a given stock.
