@@ -1,0 +1,13 @@
+{
+  "name": "generate_essay",
+  "source_file": "tools.py",
+  "docstring": "Generate LinkedIn post from plan and research content",
+  "args": [
+    "task",
+    "plan",
+    "content",
+    "brand_guidelines",
+    "revision_number"
+  ],
+  "line_range": "342-363"
+}

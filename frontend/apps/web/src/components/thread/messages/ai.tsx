@@ -138,7 +138,7 @@ export function AssistantMessage({
 
           {message && <CustomComponent message={message} thread={thread} />}
           {isAgentInboxInterruptSchema(threadInterrupt?.value) &&
-            (isLastMessage || hasNoAIOrToolMessages) && (
+            (isLastMessage || (threadInterrupt?.value?.action_request?.action === "brand_info_request")) && (
               <ThreadView interrupt={threadInterrupt.value} />
             )}
           {threadInterrupt?.value &&

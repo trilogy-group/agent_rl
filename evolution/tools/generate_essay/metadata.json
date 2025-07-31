@@ -1,0 +1,17 @@
+{
+  "name": "generate_essay",
+  "description": "Function generate_essay",
+  "category": "utility",
+  "metrics": [],
+  "original_file": "backend/src/marketing/tools.py",
+  "function_name": "generate_essay",
+  "args": [
+    "task",
+    "plan",
+    "content",
+    "brand_guidelines",
+    "revision_number"
+  ],
+  "decorator_metadata": {},
+  "is_method": false
+}

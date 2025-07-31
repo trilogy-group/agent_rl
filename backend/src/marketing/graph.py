@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import TypedDict, Annotated, List
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -12,6 +13,7 @@ from src.marketing.tools import (
     research_for_plan, generate_essay, reflect_on_draft, research_for_critique,
     has_brand_guidelines, research_for_brand, generate_brand_guidelines
 )
+from src.marketing.rl_tracker import track_node
 from langgraph.types import interrupt
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -33,10 +35,7 @@ class AgentState(TypedDict):
     max_revisions: int
 
 
-
-# Node functions
-
-
+@track_node()
 def orchestrator_node(state: AgentState):
     logger.info("Orchestrator node started")
 
@@ -59,6 +58,7 @@ def orchestrator_node(state: AgentState):
     return {"intent": intent, "task": task}
 
 
+@track_node()
 def chatbot_node(state: AgentState):
     logger.info("Chatbot node started")
     
@@ -67,6 +67,7 @@ def chatbot_node(state: AgentState):
     return {"messages": [AIMessage(content=response_content)]}
 
 
+@track_node()
 def improve_draft_node(state: AgentState):
     logger.info("Improve draft node started")
     
@@ -79,6 +80,7 @@ def improve_draft_node(state: AgentState):
     }
 
 
+@track_node()
 def brand_guidelines_node(state: AgentState):
     logger.info("Brand guidelines node started")
 
@@ -94,21 +96,64 @@ def brand_guidelines_node(state: AgentState):
             "I'll research your brand to understand your voice, values, and messaging style, then create comprehensive guidelines for content creation."
         )
 
-        # Get brand info from user
-        brand_info = interrupt(message)
-        logger.info(f"Received brand info: {brand_info}")
+        # Create proper interrupt structure to display message and get response
+        interrupt_data = {
+            "action_request": {
+                "action": "brand_info_request",
+                "args": {
+                    "message": message
+                }
+            },
+            "config": {
+                "allow_edit": False,
+                "allow_respond": True,
+                "allow_accept": False,
+                "allow_ignore": False
+            }
+        }
+
+        # Get user input for brand information
+        user_brand_info = interrupt(interrupt_data)
+        logger.info(f"Received brand info from user: {user_brand_info}")
+
+        # Extract string from interrupt response structure: [{'type': 'response', 'args': 'actual_content'}]
+        if isinstance(user_brand_info, list) and user_brand_info:
+            first_item = user_brand_info[0]
+            if isinstance(first_item, dict) and first_item.get('type') == 'response':
+                brand_info_str = first_item.get('args', '')
+            elif isinstance(first_item, dict):
+                # Fallback for other dict structures
+                brand_info_str = (first_item.get('content') or 
+                                 first_item.get('text') or 
+                                 first_item.get('message') or 
+                                 str(first_item))
+            else:
+                brand_info_str = str(first_item)
+        elif isinstance(user_brand_info, dict):
+            # Direct dict response
+            brand_info_str = (user_brand_info.get('content') or 
+                             user_brand_info.get('text') or 
+                             user_brand_info.get('message') or 
+                             str(user_brand_info))
+        else:
+            brand_info_str = str(user_brand_info) if user_brand_info else ""
         
-        # Research brand information
-        logger.info("Starting brand research")
-        brand_research = research_for_brand(brand_info)
+        logger.info(f"Processing brand info: {brand_info_str}")
+
+        # Use tools to research and generate brand guidelines
+        logger.info("Researching brand information")
+        brand_research = research_for_brand(brand_info_str)
         
-        # Generate brand guidelines from research
         logger.info("Generating brand guidelines from research")
-        brand_guidelines = generate_brand_guidelines(brand_research)
+        generated_guidelines = generate_brand_guidelines(brand_research)
         
-        logger.info(f"Generated brand guidelines with {len(brand_guidelines)} characters")
-        
-        return {"brand_guidelines": brand_guidelines}
+        logger.info(f"Generated brand guidelines with {len(generated_guidelines)} characters")
+
+        # Return the message to display and the generated brand guidelines
+        return {
+            "messages": [AIMessage(content=message)],
+            "brand_guidelines": generated_guidelines
+        }
 
     logger.info(f"Using existing brand guidelines with {len(brand_guidelines)} characters")
     
@@ -116,6 +161,7 @@ def brand_guidelines_node(state: AgentState):
 
 
 
+@track_node()
 def plan_node(state: AgentState):
     logger.info("Plan node started")
     plan = create_plan(state['messages'])
@@ -123,6 +169,7 @@ def plan_node(state: AgentState):
     return {"plan": plan}
 
 
+@track_node()
 def research_plan_node(state: AgentState):
     logger.info("Research plan node started")
     
@@ -132,6 +179,7 @@ def research_plan_node(state: AgentState):
     return {"research": research}
 
 
+@track_node()
 def generation_node(state: AgentState):
     logger.info("Generation node started")
     
@@ -150,29 +198,8 @@ def generation_node(state: AgentState):
     }
 
 
-def reflection_node(state: AgentState):
-    logger.info("Reflection node started")
-    
-    critique = reflect_on_draft(state['draft'])
-    
-    return {"critique": critique}
 
-
-def research_critique_node(state: AgentState):
-    logger.info("Research critique node started")
-    
-    existing_content = state.get('content', [])
-    content = research_for_critique(state['critique'], existing_content)
-    
-    return {"content": content}
-
-
-# def should_continue(state):
-#     if state["revision_number"] > state.get("max_revisions", 2):
-#         return END
-#     return "reflect"
-
-
+@track_node()
 def route_from_orchestrator(state):
     logger.info(f"Routing from orchestrator with state: {state}")
     intent = state["intent"]
@@ -198,9 +225,8 @@ builder.add_node("improve_draft", improve_draft_node)
 builder.add_node("brand_guidelines", brand_guidelines_node)
 builder.add_node("planner", plan_node)
 builder.add_node("generate", generation_node)
-builder.add_node("reflect", reflection_node)
+
 builder.add_node("research_plan", research_plan_node)
-builder.add_node("research_critique", research_critique_node)
 
 builder.set_entry_point("orchestrator")
 
@@ -214,18 +240,9 @@ builder.add_edge("chatbot", END)
 builder.add_edge("improve_draft", END)
 builder.add_edge("brand_guidelines", "planner")
 
-# builder.add_conditional_edges(
-#     "generate", 
-#     should_continue, 
-#     {END: END, "reflect": "reflect"}
-# )
-
 
 builder.add_edge("planner", "research_plan")
 builder.add_edge("research_plan", "generate")
-
-builder.add_edge("reflect", "research_critique")
-builder.add_edge("research_critique", "generate")
 builder.add_edge("generate", END)
 
 

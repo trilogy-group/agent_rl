@@ -1,0 +1,17 @@
+{
+  "name": "generate_brand_guidelines",
+  "description": "Function generate_brand_guidelines",
+  "category": "utility",
+  "metrics": [
+    "brand_alignment",
+    "clarity",
+    "readability"
+  ],
+  "original_file": "backend/src/marketing/tools.py",
+  "function_name": "generate_brand_guidelines",
+  "args": [
+    "brand_research"
+  ],
+  "decorator_metadata": {},
+  "is_method": false
+}

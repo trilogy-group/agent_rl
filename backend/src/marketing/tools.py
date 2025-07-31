@@ -1,11 +1,13 @@
 import os
 import logging
 from typing import List
+from datetime import datetime
 from dotenv import load_dotenv
 from pydantic import BaseModel  
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from tavily import TavilyClient
+from agent_rl.evolution.evolve_decorator import evolve
 
 load_dotenv()
 
@@ -62,24 +64,20 @@ Create a clear outline for the user's requested topic that includes:
 
 Keep the structure concise and optimized for LinkedIn's professional audience. The final post should be 150-300 words maximum."""
 
-WRITER_PROMPT = """You are a LinkedIn content expert tasked with writing engaging, professional LinkedIn posts.\
-Create a compelling LinkedIn post based on the user's request and outline. \
+WRITER_PROMPT = """As an expert LinkedIn content strategist, your mission is to create an engaging and insightful LinkedIn post using the provided outline and research materials. The post should engage a broad audience and encourage meaningful interaction.
 
-Key requirements:
-- Keep it between 150-300 words maximum
-- Use a strong, attention-grabbing opening hook
-- Include 2-3 key insights or main points
-- Add line breaks for readability (LinkedIn format)
-- Include a clear call to action
-- End with 3-5 relevant hashtags
-- Make it engaging and shareable
+Instructions:
+1. **Engage Immediately**: Begin with a captivating hook or story to grab attention.
+2. **Develop Key Points**: Elaborate on 2-3 main ideas, supported by research, and use storytelling or analogies for clarity.
+3. **Professional Tone**: Maintain a tone that is professional yet approachable and aligns with the brand's voice.
+4. **Structure and Readability**: Ensure the post is logically structured with clear paragraphs and line breaks.
+5. **Conclude Effectively**: End with a strong call to action that encourages readers to engage.
+6. **Enhance Visibility**: Include 3-5 relevant hashtags to increase reach.
 
-IMPORTANT: Follow these brand guidelines exactly:
+Adhere to these brand guidelines for consistency and authenticity:
 {brand_guidelines}
 
-Make sure the tone, style, messaging, and personality of the post aligns perfectly with the brand guidelines above.
-
-Use the research content below to support your points:
+Your content should resonate with the audience while staying true to the brand's values. Use the following research content to inform your writing:
 
 ------
 
@@ -98,14 +96,14 @@ Analyze the post and provide constructive feedback focusing on:
 
 Provide specific, actionable recommendations to enhance the post's performance on LinkedIn."""
 
-RESEARCH_PLAN_PROMPT = """You are a researcher gathering current information for a LinkedIn post. \
+RESEARCH_PLAN_PROMPT = """You are a researcher gathering current information for a LinkedIn post. Today's date is {current_date}. \
 Generate a list of search queries that will find relevant, up-to-date information including:
-- Recent trends and statistics
+- Recent trends and statistics ({current_month_range})
 - Expert opinions and insights
 - Real-world examples and case studies
 - Industry news and developments
 
-Generate 3 targeted search queries maximum."""
+Generate 3 targeted search queries maximum. Focus on finding the most recent and current information."""
 
 RESEARCH_CRITIQUE_PROMPT = """You are a researcher finding additional information to improve a LinkedIn post based on feedback. \
 Generate search queries that will find:
@@ -117,15 +115,18 @@ Generate search queries that will find:
 Based on the critique feedback, generate 3 targeted search queries maximum."""
 
 BRAND_RESEARCH_PROMPT = """You are a brand researcher tasked with analyzing a company or brand to understand their brand guidelines. \
+
+The user has provided: {brand_input}
+
 Generate search queries to find information about:
 - Brand voice and tone
-- Visual identity and style
 - Core values and mission
 - Target audience and positioning
 - Content style and messaging patterns
 - Brand personality and characteristics
+- Recent content and communications
 
-Generate 3 targeted search queries maximum to gather comprehensive brand information."""
+Generate 3 targeted search queries maximum to gather comprehensive brand information about this specific brand/company."""
 
 BRAND_GUIDELINES_GENERATION_PROMPT = """You are a brand strategist tasked with creating comprehensive brand guidelines based on research. \
 
@@ -174,7 +175,7 @@ def classify_intent(messages: List) -> str:
     
     classification_messages = [
         SystemMessage(content=ORCHESTRATOR_PROMPT)
-    ] + messages[-1:]
+    ] + messages[-5:]
 
     print("Classification messages: ", classification_messages)
     
@@ -250,8 +251,17 @@ def research_for_plan(task: str, existing_content: List[str] = None) -> List[str
     logger.info("Researching content for plan")
     
     logger.info("Generating research queries")
+    current_date = datetime.now().strftime('%B %d, %Y')
+    current_month = datetime.now().strftime('%B %Y')
+    # Get previous month
+    if datetime.now().month == 1:
+        prev_month = datetime(datetime.now().year - 1, 12, 1).strftime('%B %Y')
+    else:
+        prev_month = datetime(datetime.now().year, datetime.now().month - 1, 1).strftime('%B %Y')
+    current_month_range = f"{prev_month} - {current_month}"
+    
     research_messages = [
-        SystemMessage(content=RESEARCH_PLAN_PROMPT),
+        SystemMessage(content=RESEARCH_PLAN_PROMPT.format(current_date=current_date, current_month_range=current_month_range)),
         HumanMessage(content=task)
     ]
     
@@ -261,7 +271,7 @@ def research_for_plan(task: str, existing_content: List[str] = None) -> List[str
     content = existing_content or []
     for i, q in enumerate(queries.queries):
         logger.info(f"Searching for query {i+1}/{len(queries.queries)}: {q}")
-        response = tavily.search(query=q, max_results=2)
+        response = tavily.search(query=q, max_results=2, days=30)
         logger.info(f"Found {len(response['results'])} results for query: {q}")
         for r in response['results']:
             content.append(r['content'])
@@ -273,19 +283,34 @@ def research_for_brand(brand_info: str, existing_content: List[str] = None) -> L
     """Research brand information for guidelines generation"""
     logger.info("Researching brand information for guidelines")
     
+    content = existing_content or []
+    
+    # Check if brand_info is a URL
+    is_url = brand_info.strip().startswith(('http://', 'https://')) or '.' in brand_info and ' ' not in brand_info.strip()
+    
+    if is_url:
+        logger.info(f"Detected URL input: {brand_info}")
+        # Try to get content directly from the URL
+        try:
+            url_response = tavily.search(query=f"site:{brand_info}", max_results=3, days=30)
+            logger.info(f"Found {len(url_response['results'])} results from website")
+            for r in url_response['results']:
+                content.append(f"Website content: {r['content']}")
+        except Exception as e:
+            logger.warning(f"Could not fetch website content: {e}")
+    
     logger.info("Generating brand research queries")
     research_messages = [
-        SystemMessage(content=BRAND_RESEARCH_PROMPT),
-        HumanMessage(content=f"Research this brand/company: {brand_info}")
+        SystemMessage(content=BRAND_RESEARCH_PROMPT.format(brand_input=brand_info)),
+        HumanMessage(content=f"Generate targeted search queries for this brand/company: {brand_info}")
     ]
     
     queries = model.with_structured_output(Queries).invoke(research_messages)
     logger.info(f"Generated {len(queries.queries)} brand research queries: {queries.queries}")
     
-    content = existing_content or []
     for i, q in enumerate(queries.queries):
         logger.info(f"Searching for brand query {i+1}/{len(queries.queries)}: {q}")
-        response = tavily.search(query=q, max_results=3)
+        response = tavily.search(query=q, max_results=3, days=30)
         logger.info(f"Found {len(response['results'])} results for brand query: {q}")
         for r in response['results']:
             content.append(r['content'])
@@ -293,6 +318,11 @@ def research_for_brand(brand_info: str, existing_content: List[str] = None) -> L
     logger.info(f"Brand research completed with {len(content)} content pieces")
     return content
 
+@evolve(
+    name="generate_brand_guidelines",
+    metrics=["brand_alignment", "clarity", "readability"],
+    metadata={"platform": "linkedin", "max_length": 300}
+)
 def generate_brand_guidelines(brand_research: List[str]) -> str:
     """Generate brand guidelines from research content"""
     logger.info("Generating brand guidelines from research")
@@ -311,6 +341,7 @@ def generate_brand_guidelines(brand_research: List[str]) -> str:
     
     return response.content
 
+@evolve()
 def generate_essay(task: str, plan: str, content: List[str], brand_guidelines: str, revision_number: int = 1) -> tuple[str, int]:
     """Generate LinkedIn post from plan and research content"""
     logger.info("Generating LinkedIn post")
@@ -366,7 +397,7 @@ def research_for_critique(critique: str, existing_content: List[str] = None) -> 
     content = existing_content or []
     for i, q in enumerate(queries.queries):
         logger.info(f"Searching for critique query {i+1}/{len(queries.queries)}: {q}")
-        response = tavily.search(query=q, max_results=2)
+        response = tavily.search(query=q, max_results=2, days=30)
         logger.info(f"Found {len(response['results'])} results for critique query: {q}")
         for r in response['results']:
             content.append(r['content'])

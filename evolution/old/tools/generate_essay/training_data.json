@@ -1,0 +1,222 @@
+[
+  {
+    "input": {
+      "task": "Create a LinkedIn post about the importance of AI in healthcare",
+      "plan": "Discuss AI's role in diagnostics, patient care, and operational efficiency",
+      "content": [
+        "AI can analyze medical data faster than humans.",
+        "AI-powered tools help in early diagnosis of diseases.",
+        "Hospitals use AI for better resource management."
+      ],
+      "brand_guidelines": "Use a professional tone with a focus on innovation and trust."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "coherent",
+        "engaging",
+        "well_structured"
+      ],
+      "min_score": 0.8
+    },
+    "category": "quality_assessment",
+    "description": "Tests the tool's ability to generate a coherent and engaging post on a complex topic."
+  },
+  {
+    "input": {
+      "task": "Write a LinkedIn post about remote work trends",
+      "plan": "Highlight flexibility, productivity, and work-life balance",
+      "content": [
+        "Remote work has increased by 300% since 2020.",
+        "Employees report higher job satisfaction.",
+        "Companies save on office space costs."
+      ],
+      "brand_guidelines": "Maintain a casual yet informative tone, emphasizing employee well-being."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "informative",
+        "engaging",
+        "aligned with brand"
+      ],
+      "min_score": 0.75
+    },
+    "category": "accuracy_test",
+    "description": "Evaluates the tool's accuracy in reflecting current remote work trends."
+  },
+  {
+    "input": {
+      "task": "Generate a LinkedIn post about sustainable business practices",
+      "plan": "Discuss eco-friendly initiatives and their impact on brand reputation",
+      "content": [
+        "Sustainability is a key driver for modern businesses.",
+        "Eco-friendly practices attract environmentally conscious consumers.",
+        "Sustainable brands see a 20% increase in customer loyalty."
+      ],
+      "brand_guidelines": "Use a persuasive tone with a focus on environmental responsibility."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "persuasive",
+        "aligned with brand",
+        "impactful"
+      ],
+      "min_score": 0.85
+    },
+    "category": "usefulness_evaluation",
+    "description": "Assesses the tool's ability to create a persuasive post that aligns with brand values."
+  },
+  {
+    "input": {
+      "task": "Create a LinkedIn post about the future of electric vehicles",
+      "plan": "Focus on technological advancements and market growth",
+      "content": [
+        "Electric vehicle sales are projected to increase by 30% annually.",
+        "New battery technologies extend vehicle range.",
+        "Governments offer incentives for electric vehicle adoption."
+      ],
+      "brand_guidelines": "Adopt an optimistic and forward-thinking tone."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "forward-thinking",
+        "engaging",
+        "well-researched"
+      ],
+      "min_score": 0.8
+    },
+    "category": "complexity_variation",
+    "description": "Tests the tool's capability to handle complex topics with multiple key points."
+  },
+  {
+    "input": {
+      "task": "Write a LinkedIn post about the benefits of mindfulness in the workplace",
+      "plan": "Explain how mindfulness improves focus and reduces stress",
+      "content": [
+        "Mindfulness practices can increase productivity by 15%.",
+        "Employees report lower stress levels with regular mindfulness sessions.",
+        "Mindfulness fosters a positive work environment."
+      ],
+      "brand_guidelines": "Use a calming and supportive tone, focusing on employee well-being."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "calming",
+        "supportive",
+        "informative"
+      ],
+      "min_score": 0.75
+    },
+    "category": "quality_assessment",
+    "description": "Evaluates the tool's ability to create a supportive and informative post."
+  },
+  {
+    "input": {
+      "task": "Generate a LinkedIn post about cybersecurity best practices",
+      "plan": "Highlight the importance of data protection and employee training",
+      "content": [
+        "Cyber threats are becoming more sophisticated.",
+        "Regular training can prevent 80% of cyber attacks.",
+        "Data protection is crucial for maintaining customer trust."
+      ],
+      "brand_guidelines": "Maintain a serious and authoritative tone, emphasizing security."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "authoritative",
+        "informative",
+        "aligned with brand"
+      ],
+      "min_score": 0.85
+    },
+    "category": "accuracy_test",
+    "description": "Tests the tool's accuracy in conveying critical cybersecurity information."
+  },
+  {
+    "input": {
+      "task": "Create a LinkedIn post about the impact of digital transformation",
+      "plan": "Discuss how digital tools enhance business operations and customer experience",
+      "content": [
+        "Digital tools streamline operations and improve efficiency.",
+        "Enhanced customer experience leads to higher satisfaction.",
+        "Digital transformation is essential for staying competitive."
+      ],
+      "brand_guidelines": "Use a dynamic and innovative tone, focusing on growth."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "dynamic",
+        "engaging",
+        "well-structured"
+      ],
+      "min_score": 0.8
+    },
+    "category": "usefulness_evaluation",
+    "description": "Assesses the tool's ability to generate a post that highlights digital transformation benefits."
+  },
+  {
+    "input": {
+      "task": "Write a LinkedIn post about leadership in the digital age",
+      "plan": "Focus on adaptability, communication, and technology adoption",
+      "content": [
+        "Leaders must adapt to rapidly changing technologies.",
+        "Effective communication is key in digital leadership.",
+        "Technology adoption drives organizational success."
+      ],
+      "brand_guidelines": "Adopt an inspirational and motivational tone."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "inspirational",
+        "motivational",
+        "aligned with brand"
+      ],
+      "min_score": 0.85
+    },
+    "category": "complexity_variation",
+    "description": "Tests the tool's ability to create an inspirational post on a multifaceted topic."
+  },
+  {
+    "input": {
+      "task": "Generate a LinkedIn post about the role of AI in education",
+      "plan": "Discuss personalized learning and AI-driven educational tools",
+      "content": [
+        "AI enables personalized learning experiences.",
+        "AI tools help educators identify student needs.",
+        "AI-driven platforms enhance student engagement."
+      ],
+      "brand_guidelines": "Use an educational and informative tone, focusing on innovation."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "educational",
+        "informative",
+        "engaging"
+      ],
+      "min_score": 0.8
+    },
+    "category": "usefulness_evaluation",
+    "description": "Assesses the tool's ability to generate an informative post on AI in education."
+  },
+  {
+    "input": {
+      "task": "Write a LinkedIn post about the benefits of diversity in the workplace",
+      "plan": "Highlight innovation, creativity, and improved decision-making",
+      "content": [
+        "Diverse teams drive innovation and creativity.",
+        "Companies with diverse leadership perform better financially.",
+        "Diversity leads to improved decision-making processes."
+      ],
+      "brand_guidelines": "Use an inclusive and empowering tone, emphasizing diversity."
+    },
+    "expected_output": {
+      "quality_criteria": [
+        "inclusive",
+        "empowering",
+        "well-structured"
+      ],
+      "min_score": 0.85
+    },
+    "category": "quality_assessment",
+    "description": "Evaluates the tool's ability to create an inclusive and empowering post."
+  }
+]

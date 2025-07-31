@@ -1,0 +1,457 @@
+[
+  {
+    "input": {
+      "brand_info": "https://www.apple.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Apple's brand voice is innovative and sleek, focusing on simplicity and user-friendliness.",
+      "Core values include innovation, quality, and environmental responsibility.",
+      "Target audience includes tech-savvy individuals and creative professionals.",
+      "Content style is minimalist with a focus on high-quality visuals.",
+      "Brand personality is innovative, premium, and user-centric."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of extracting brand guidelines from a well-known tech company URL."
+  },
+  {
+    "input": {
+      "brand_info": "Nike",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Nike's brand voice is motivational and empowering.",
+      "Core values include performance, innovation, and sustainability.",
+      "Target audience includes athletes and fitness enthusiasts.",
+      "Content style is dynamic and energetic, often featuring athletes.",
+      "Brand personality is bold, competitive, and inspiring."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of generating brand guidelines for a global sports brand."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.tesla.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Tesla's brand voice is futuristic and innovative.",
+      "Core values include sustainability, innovation, and safety.",
+      "Target audience includes environmentally conscious consumers and tech enthusiasts.",
+      "Content style is sleek and modern, with a focus on technology.",
+      "Brand personality is visionary, disruptive, and eco-friendly."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of extracting brand guidelines from an automotive tech company URL."
+  },
+  {
+    "input": {
+      "brand_info": "Coca-Cola",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Coca-Cola's brand voice is friendly and optimistic.",
+      "Core values include happiness, refreshment, and community.",
+      "Target audience includes a broad demographic, focusing on family and friends.",
+      "Content style is vibrant and nostalgic, often featuring shared moments.",
+      "Brand personality is joyful, classic, and inclusive."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of generating brand guidelines for a global beverage brand."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.microsoft.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Microsoft's brand voice is professional and empowering.",
+      "Core values include innovation, accessibility, and trust.",
+      "Target audience includes businesses, developers, and tech users.",
+      "Content style is informative and straightforward, with a focus on productivity.",
+      "Brand personality is reliable, innovative, and inclusive."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of extracting brand guidelines from a tech giant's URL."
+  },
+  {
+    "input": {
+      "brand_info": "Starbucks",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Starbucks' brand voice is warm and inviting.",
+      "Core values include quality, community, and sustainability.",
+      "Target audience includes coffee lovers and urban professionals.",
+      "Content style is cozy and community-focused, often featuring local stories.",
+      "Brand personality is welcoming, premium, and socially responsible."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of generating brand guidelines for a global coffeehouse chain."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.amazon.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Amazon's brand voice is customer-centric and efficient.",
+      "Core values include customer obsession, operational excellence, and innovation.",
+      "Target audience includes online shoppers and businesses.",
+      "Content style is straightforward and informative, with a focus on convenience.",
+      "Brand personality is innovative, reliable, and customer-focused."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of extracting brand guidelines from a major e-commerce platform URL."
+  },
+  {
+    "input": {
+      "brand_info": "Google",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Google's brand voice is friendly and informative.",
+      "Core values include innovation, accessibility, and user focus.",
+      "Target audience includes internet users and businesses.",
+      "Content style is clean and user-friendly, with a focus on simplicity.",
+      "Brand personality is innovative, approachable, and trustworthy."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of generating brand guidelines for a leading tech company."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.ibm.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "IBM's brand voice is authoritative and innovative.",
+      "Core values include trust, innovation, and client success.",
+      "Target audience includes enterprises and tech professionals.",
+      "Content style is professional and technical, with a focus on solutions.",
+      "Brand personality is reliable, innovative, and expert."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of extracting brand guidelines from a technology and consulting company URL."
+  },
+  {
+    "input": {
+      "brand_info": "Disney",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Disney's brand voice is magical and family-friendly.",
+      "Core values include imagination, happiness, and storytelling.",
+      "Target audience includes families and children.",
+      "Content style is whimsical and colorful, often featuring beloved characters.",
+      "Brand personality is enchanting, nostalgic, and joyful."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of generating brand guidelines for a global entertainment company."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.intel.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Intel's brand voice is innovative and technical.",
+      "Core values include innovation, performance, and sustainability.",
+      "Target audience includes tech enthusiasts and enterprises.",
+      "Content style is technical and informative, with a focus on performance.",
+      "Brand personality is innovative, reliable, and expert."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of extracting brand guidelines from a semiconductor company URL."
+  },
+  {
+    "input": {
+      "brand_info": "Samsung",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Samsung's brand voice is innovative and dynamic.",
+      "Core values include quality, innovation, and customer satisfaction.",
+      "Target audience includes tech-savvy consumers and businesses.",
+      "Content style is sleek and modern, with a focus on technology.",
+      "Brand personality is innovative, reliable, and versatile."
+    ],
+    "category": "accuracy_test",
+    "description": "Tests accuracy of generating brand guidelines for a global electronics company."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.airbnb.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Airbnb's brand voice is friendly and adventurous.",
+      "Core values include belonging, community, and exploration.",
+      "Target audience includes travelers and hosts.",
+      "Content style is inviting and personal, often featuring user stories.",
+      "Brand personality is adventurous, inclusive, and community-focused."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines extracted from a travel platform URL."
+  },
+  {
+    "input": {
+      "brand_info": "Netflix",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Netflix's brand voice is entertaining and engaging.",
+      "Core values include creativity, innovation, and customer satisfaction.",
+      "Target audience includes entertainment seekers and binge-watchers.",
+      "Content style is dynamic and engaging, often featuring popular shows.",
+      "Brand personality is innovative, entertaining, and customer-focused."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines for a leading streaming service."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.uber.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Uber's brand voice is innovative and urban.",
+      "Core values include convenience, safety, and innovation.",
+      "Target audience includes urban commuters and travelers.",
+      "Content style is straightforward and modern, with a focus on convenience.",
+      "Brand personality is innovative, reliable, and urban."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines extracted from a ride-sharing platform URL."
+  },
+  {
+    "input": {
+      "brand_info": "Spotify",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Spotify's brand voice is vibrant and musical.",
+      "Core values include creativity, accessibility, and innovation.",
+      "Target audience includes music lovers and podcast listeners.",
+      "Content style is dynamic and colorful, often featuring playlists.",
+      "Brand personality is innovative, entertaining, and user-friendly."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines for a leading music streaming service."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.adidas.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Adidas' brand voice is sporty and energetic.",
+      "Core values include performance, innovation, and sustainability.",
+      "Target audience includes athletes and fitness enthusiasts.",
+      "Content style is dynamic and energetic, often featuring athletes.",
+      "Brand personality is bold, competitive, and inspiring."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines extracted from a sportswear company URL."
+  },
+  {
+    "input": {
+      "brand_info": "LinkedIn",
+      "existing_content": []
+    },
+    "expected_output": [
+      "LinkedIn's brand voice is professional and empowering.",
+      "Core values include connection, opportunity, and growth.",
+      "Target audience includes professionals and businesses.",
+      "Content style is professional and informative, with a focus on networking.",
+      "Brand personality is reliable, professional, and empowering."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines for a professional networking platform."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.paypal.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "PayPal's brand voice is secure and user-friendly.",
+      "Core values include trust, innovation, and accessibility.",
+      "Target audience includes online shoppers and businesses.",
+      "Content style is straightforward and secure, with a focus on ease of use.",
+      "Brand personality is reliable, innovative, and customer-focused."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines extracted from a digital payment platform URL."
+  },
+  {
+    "input": {
+      "brand_info": "Slack",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Slack's brand voice is friendly and collaborative.",
+      "Core values include communication, collaboration, and innovation.",
+      "Target audience includes teams and businesses.",
+      "Content style is straightforward and engaging, with a focus on teamwork.",
+      "Brand personality is innovative, approachable, and collaborative."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines for a team communication platform."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.salesforce.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Salesforce's brand voice is professional and customer-centric.",
+      "Core values include trust, innovation, and customer success.",
+      "Target audience includes businesses and sales professionals.",
+      "Content style is professional and informative, with a focus on solutions.",
+      "Brand personality is reliable, innovative, and customer-focused."
+    ],
+    "category": "usefulness_evaluation",
+    "description": "Evaluates the usefulness of brand guidelines extracted from a CRM platform URL."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.ibm.com",
+      "existing_content": [
+        "IBM's recent campaign focuses on AI and cloud solutions.",
+        "Their messaging emphasizes innovation and client success."
+      ]
+    },
+    "expected_output": [
+      "IBM's brand voice is authoritative and innovative.",
+      "Core values include trust, innovation, and client success.",
+      "Target audience includes enterprises and tech professionals.",
+      "Content style is professional and technical, with a focus on solutions.",
+      "Brand personality is reliable, innovative, and expert.",
+      "Recent content aligns with their focus on AI and cloud solutions."
+    ],
+    "category": "complexity_variation",
+    "description": "Tests performance on combining existing content with new brand research."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.tesla.com",
+      "existing_content": [
+        "Tesla's latest announcements highlight their commitment to sustainability.",
+        "Their communication style is direct and visionary."
+      ]
+    },
+    "expected_output": [
+      "Tesla's brand voice is futuristic and innovative.",
+      "Core values include sustainability, innovation, and safety.",
+      "Target audience includes environmentally conscious consumers and tech enthusiasts.",
+      "Content style is sleek and modern, with a focus on technology.",
+      "Brand personality is visionary, disruptive, and eco-friendly.",
+      "Recent content emphasizes sustainability and direct communication."
+    ],
+    "category": "complexity_variation",
+    "description": "Tests performance on integrating existing content with brand research."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.apple.com",
+      "existing_content": [
+        "Apple's recent focus is on privacy and user empowerment.",
+        "Their messaging is sleek and minimalist."
+      ]
+    },
+    "expected_output": [
+      "Apple's brand voice is innovative and sleek, focusing on simplicity and user-friendliness.",
+      "Core values include innovation, quality, and environmental responsibility.",
+      "Target audience includes tech-savvy individuals and creative professionals.",
+      "Content style is minimalist with a focus on high-quality visuals.",
+      "Brand personality is innovative, premium, and user-centric.",
+      "Recent content highlights privacy and user empowerment."
+    ],
+    "category": "complexity_variation",
+    "description": "Tests performance on combining existing content with comprehensive brand research."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.microsoft.com",
+      "existing_content": [
+        "Microsoft's latest initiatives focus on cloud computing and AI.",
+        "Their communication style is professional and empowering."
+      ]
+    },
+    "expected_output": [
+      "Microsoft's brand voice is professional and empowering.",
+      "Core values include innovation, accessibility, and trust.",
+      "Target audience includes businesses, developers, and tech users.",
+      "Content style is informative and straightforward, with a focus on productivity.",
+      "Brand personality is reliable, innovative, and inclusive.",
+      "Recent content emphasizes cloud computing and AI."
+    ],
+    "category": "complexity_variation",
+    "description": "Tests performance on integrating existing content with brand research."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.amazon.com",
+      "existing_content": [
+        "Amazon's recent campaigns focus on sustainability and customer satisfaction.",
+        "Their messaging is efficient and customer-centric."
+      ]
+    },
+    "expected_output": [
+      "Amazon's brand voice is customer-centric and efficient.",
+      "Core values include customer obsession, operational excellence, and innovation.",
+      "Target audience includes online shoppers and businesses.",
+      "Content style is straightforward and informative, with a focus on convenience.",
+      "Brand personality is innovative, reliable, and customer-focused.",
+      "Recent content highlights sustainability and customer satisfaction."
+    ],
+    "category": "complexity_variation",
+    "description": "Tests performance on combining existing content with comprehensive brand research."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.nike.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Nike's brand voice is motivational and empowering.",
+      "Core values include performance, innovation, and sustainability.",
+      "Target audience includes athletes and fitness enthusiasts.",
+      "Content style is dynamic and energetic, often featuring athletes.",
+      "Brand personality is bold, competitive, and inspiring."
+    ],
+    "category": "quality_assessment",
+    "description": "Assesses quality of brand guidelines extracted from a sportswear company URL."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.coca-cola.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Coca-Cola's brand voice is friendly and optimistic.",
+      "Core values include happiness, refreshment, and community.",
+      "Target audience includes a broad demographic, focusing on family and friends.",
+      "Content style is vibrant and nostalgic, often featuring shared moments.",
+      "Brand personality is joyful, classic, and inclusive."
+    ],
+    "category": "quality_assessment",
+    "description": "Assesses quality of brand guidelines extracted from a beverage company URL."
+  },
+  {
+    "input": {
+      "brand_info": "https://www.disney.com",
+      "existing_content": []
+    },
+    "expected_output": [
+      "Disney's brand voice is magical and family-friendly.",
+      "Core values include imagination, happiness, and storytelling.",
+      "Target audience includes families and children.",
+      "Content style is whimsical and colorful, often featuring beloved characters.",
+      "Brand personality is enchanting, nostalgic, and joyful."
+    ],
+    "category": "quality_assessment",
+    "description": "Assesses quality of brand guidelines extracted from an entertainment company URL."
+  }
+]

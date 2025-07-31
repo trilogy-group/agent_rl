@@ -1,0 +1,10 @@
+{
+  "name": "research_for_brand",
+  "source_file": "tools.py",
+  "docstring": "Research brand information for guidelines generation",
+  "args": [
+    "brand_info",
+    "existing_content"
+  ],
+  "line_range": "285-322"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "generate_brand_guidelines",
+  "source_file": "tools.py",
+  "docstring": "Generate brand guidelines from research content",
+  "args": [
+    "brand_research"
+  ],
+  "line_range": "324-340"
+}
