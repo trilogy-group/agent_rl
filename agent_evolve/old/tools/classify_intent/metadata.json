@@ -1,9 +1,0 @@
-{
-  "name": "classify_intent",
-  "source_file": "tools.py",
-  "docstring": "Classify user intent from messages",
-  "args": [
-    "messages"
-  ],
-  "line_range": "175-193"
-}
