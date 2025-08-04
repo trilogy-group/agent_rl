@@ -7,10 +7,9 @@ Provides backward compatibility with the old rl_tracker.py
 import sys
 import os
 
-# Add the generic tracker to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
-
-from generic_tracker import track_node as generic_track_node, TrackerConfig
+# Import from the installed agent-evolve package
+from agent_evolve.tracking.decorator import track_node as generic_track_node
+from agent_evolve.tracking.config import TrackerConfig
 
 # Create LangGraph-specific configuration
 langgraph_config = TrackerConfig(

@@ -1,34 +1,14 @@
 """
 Import helper for agent_evolve package.
 
-This module handles the import of agent_evolve components with proper path resolution.
+This module handles the import of agent_evolve components from the installed package.
 """
 
-import sys
-import os
-from pathlib import Path
-
-def setup_agent_evolve_path():
-    """Add agent_evolve package to Python path if not already present."""
-    
-    # Get the directory where this file is located
-    current_file = Path(__file__).resolve()
-    
-    # Navigate to the agent_evolve directory (should be ../../../agent_evolve from here)
-    agent_evolve_parent = current_file.parent.parent.parent.parent
-    agent_evolve_path = str(agent_evolve_parent)
-    
-    # Add to path if not already there
-    if agent_evolve_path not in sys.path:
-        sys.path.insert(0, agent_evolve_path)
-
-# Set up the path when this module is imported
-setup_agent_evolve_path()
-
-# Now import the components we need
+# Import from the installed agent-evolve package
 try:
-    from agent_evolve import track_node, evolve
-    print(f"✅ Successfully imported real decorators from agent_evolve")
+    from agent_evolve.tracking.decorator import track_node
+    from agent_evolve.evolve_decorator import evolve
+    print(f"✅ Successfully imported decorators from installed agent-evolve package")
     __all__ = ['track_node', 'evolve']
 except ImportError as e:
     # Fallback - create dummy decorators that do nothing
