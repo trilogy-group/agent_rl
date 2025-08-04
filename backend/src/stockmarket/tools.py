@@ -64,6 +64,7 @@ def get_basic_stock_info(ticker: str) -> pd.DataFrame:
     })
     return basic_info
 
+@evolve()
 @tool
 def get_fundamental_analysis(ticker: str, period: str = '1y') -> pd.DataFrame:
     """
@@ -168,7 +169,6 @@ def calculate_sortino_ratio(returns, risk_free_rate=0.02, target_return=0):
     downside_deviation = np.sqrt(np.mean(downside_returns**2))
     return np.sqrt(252) * excess_returns.mean() / downside_deviation
 
-@evolve()
 @tool
 def get_technical_analysis(ticker: str, period: str = "1mo") -> pd.DataFrame:
     """Perform technical analysis on a given stock.

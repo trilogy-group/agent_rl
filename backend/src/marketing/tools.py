@@ -7,7 +7,19 @@ from pydantic import BaseModel
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from tavily import TavilyClient
-from agent_rl.evolution.evolve_decorator import evolve
+try:
+    # Try relative import first (when running as package)
+    from .imports import evolve
+except ImportError:
+    # Fallback to absolute import (when running directly)
+    try:
+        from src.marketing.imports import evolve
+    except ImportError:
+        # Final fallback: dummy decorator
+        def evolve(*args, **kwargs):
+            def decorator(func):
+                return func
+            return decorator if args else decorator(args[0]) if len(args) == 1 else decorator
 
 load_dotenv()
 
@@ -17,7 +29,7 @@ logger = logging.getLogger(__name__)
 model = ChatOpenAI(model="gpt-4o", temperature=0.2)
 tavily = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
 
-# Prompts
+#@evolve()
 ORCHESTRATOR_PROMPT = """You are an orchestrator that determines what the user wants to do. 
 Analyze the user's message and determine if they want to:
 1. "research_and_write" - They want to research a topic and write a LinkedIn post about it
@@ -318,11 +330,7 @@ def research_for_brand(brand_info: str, existing_content: List[str] = None) -> L
     logger.info(f"Brand research completed with {len(content)} content pieces")
     return content
 
-@evolve(
-    name="generate_brand_guidelines",
-    metrics=["brand_alignment", "clarity", "readability"],
-    metadata={"platform": "linkedin", "max_length": 300}
-)
+
 def generate_brand_guidelines(brand_research: List[str]) -> str:
     """Generate brand guidelines from research content"""
     logger.info("Generating brand guidelines from research")
@@ -341,7 +349,7 @@ def generate_brand_guidelines(brand_research: List[str]) -> str:
     
     return response.content
 
-@evolve()
+
 def generate_essay(task: str, plan: str, content: List[str], brand_guidelines: str, revision_number: int = 1) -> tuple[str, int]:
     """Generate LinkedIn post from plan and research content"""
     logger.info("Generating LinkedIn post")

@@ -1,0 +1,75 @@
+max_iterations: 20
+random_seed: 42
+checkpoint_interval: 5
+llm:
+  models:
+  - name: gpt-4o
+    weight: 1.0
+  temperature: 0.7
+database:
+  population_size: 500
+  num_islands: 3
+  migration_interval: 25
+  feature_dimensions:
+  - accuracy
+  - clarity
+  - effectiveness
+  - consistency
+  feature_bins: 10
+evaluator:
+  enable_artifacts: true
+  cascade_evaluation: false
+  use_llm_feedback: false
+prompt:
+  system_message: 'You are an expert Python developer optimizing agent tools through
+    evolutionary programming. Your task is to improve the tool''s code and prompts
+    to maximize performance on the evaluation metrics.
+
+
+    You are optimizing the orchestrator_prompt tool code. Focus on improving:
+
+
+    CODE OPTIMIZATION PRIORITIES:
+
+    - Enhance overall output quality and usefulness
+
+    - Improve accuracy and completeness of results
+
+    - Optimize performance and reliability
+
+    - Refine user experience and usability
+
+    - Enhance innovation and effectiveness
+
+
+    PROMPT OPTIMIZATION FOCUS:
+
+    - Craft prompts for high-quality output generation
+
+    - Include instructions for accuracy and completeness
+
+    - Add context for user value optimization
+
+    - Optimize prompts for innovative solutions
+
+    - Include specific quality and format requirements
+
+
+    EVALUATION METRICS TO OPTIMIZE FOR:
+
+    - Accuracy
+
+    - Clarity
+
+    - Effectiveness
+
+    - Consistency
+
+
+    Modify the tool''s implementation, prompts, and logic to maximize scores on these
+    specific evaluation metrics.'
+  num_top_programs: 3
+  num_diverse_programs: 2
+  include_artifacts: true
+  max_artifact_bytes: 4096
+  artifact_security_filter: true

@@ -13,13 +13,31 @@ from src.marketing.tools import (
     research_for_plan, generate_essay, reflect_on_draft, research_for_critique,
     has_brand_guidelines, research_for_brand, generate_brand_guidelines
 )
-from src.marketing.rl_tracker import track_node
+try:
+    # Try relative import first (when running as package)
+    from .imports import track_node
+except ImportError:
+    # Fallback to absolute import (when running directly)
+    try:
+        from src.marketing.imports import track_node
+    except ImportError:
+        # Final fallback: dummy decorator
+        def track_node(*args, **kwargs):
+            def decorator(func):
+                return func
+            return decorator if args else decorator(args[0]) if len(args) == 1 else decorator
 from langgraph.types import interrupt
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-memory = SqliteSaver.from_conn_string('data/graph.db')
+import os
+
+# Ensure data directory exists and use absolute path
+data_dir = os.path.join(os.path.dirname(__file__), '../../data')
+os.makedirs(data_dir, exist_ok=True)
+db_path = os.path.join(data_dir, 'graph.db')
+memory = SqliteSaver.from_conn_string(db_path)
 
 
 class AgentState(TypedDict):
