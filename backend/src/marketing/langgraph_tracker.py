@@ -10,10 +10,11 @@ import os
 # Import from the installed agent-evolve package
 from agent_evolve.tracking.decorator import track_node as generic_track_node
 from agent_evolve.tracking.config import TrackerConfig
+from agent_evolve.config import DEFAULT_DB_PATH
 
 # Create LangGraph-specific configuration
 langgraph_config = TrackerConfig(
-    storage="memory",  # Change to postgresql://... for production
+    storage=f"sqlite://{DEFAULT_DB_PATH}",  # SQLite storage using configured path
     extractors={
         "thread_id": [
             "state.config.thread_id",
