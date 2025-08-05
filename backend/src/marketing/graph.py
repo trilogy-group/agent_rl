@@ -5,7 +5,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.messages import AIMessage
 from langgraph.graph.message import add_messages
-
+from agent_evolve import evolve
 
 
 from src.marketing.tools import (
@@ -97,7 +97,7 @@ def improve_draft_node(state: AgentState):
         "messages": [AIMessage(content=improved_draft)]
     }
 
-
+@evolve()
 @track_node()
 def brand_guidelines_node(state: AgentState):
     logger.info("Brand guidelines node started")

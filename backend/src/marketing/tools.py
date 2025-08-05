@@ -7,19 +7,7 @@ from pydantic import BaseModel
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from tavily import TavilyClient
-try:
-    # Try relative import first (when running as package)
-    from .imports import evolve
-except ImportError:
-    # Fallback to absolute import (when running directly)
-    try:
-        from src.marketing.imports import evolve
-    except ImportError:
-        # Final fallback: dummy decorator
-        def evolve(*args, **kwargs):
-            def decorator(func):
-                return func
-            return decorator if args else decorator(args[0]) if len(args) == 1 else decorator
+from .imports import evolve
 
 load_dotenv()
 
@@ -243,6 +231,14 @@ def improve_draft(messages: List, existing_draft: str = "") -> str:
     logger.info(f"Generated improved draft with {len(response.content)} characters")
     
     return response.content
+
+@evolve()
+def generate_fibbonacci_sequence(n: int) -> List[int]:
+    """Generate a Fibonacci sequence of length n"""
+    sequence = [0, 1]
+    for i in range(2, n):
+        sequence.append(sequence[-1] + sequence[-2])
+    return sequence
 
 def create_plan(messages: List) -> str:
     """Create essay plan from user request"""
