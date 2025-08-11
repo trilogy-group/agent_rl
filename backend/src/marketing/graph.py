@@ -5,7 +5,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.messages import AIMessage
 from langgraph.graph.message import add_messages
-from agent_evolve import evolve
+from agent_evolve import enable_trace_tracing
 
 
 from src.marketing.tools import (
@@ -13,19 +13,7 @@ from src.marketing.tools import (
     research_for_plan, generate_essay, reflect_on_draft, research_for_critique,
     has_brand_guidelines, research_for_brand, generate_brand_guidelines
 )
-try:
-    # Try relative import first (when running as package)
-    from .imports import track_node
-except ImportError:
-    # Fallback to absolute import (when running directly)
-    try:
-        from src.marketing.imports import track_node
-    except ImportError:
-        # Final fallback: dummy decorator
-        def track_node(*args, **kwargs):
-            def decorator(func):
-                return func
-            return decorator if args else decorator(args[0]) if len(args) == 1 else decorator
+
 from langgraph.types import interrupt
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -53,7 +41,6 @@ class AgentState(TypedDict):
     max_revisions: int
 
 
-@track_node()
 def orchestrator_node(state: AgentState):
     logger.info("Orchestrator node started")
 
@@ -76,7 +63,6 @@ def orchestrator_node(state: AgentState):
     return {"intent": intent, "task": task}
 
 
-@track_node()
 def chatbot_node(state: AgentState):
     logger.info("Chatbot node started")
     
@@ -85,7 +71,6 @@ def chatbot_node(state: AgentState):
     return {"messages": [AIMessage(content=response_content)]}
 
 
-@track_node()
 def improve_draft_node(state: AgentState):
     logger.info("Improve draft node started")
     
@@ -97,8 +82,8 @@ def improve_draft_node(state: AgentState):
         "messages": [AIMessage(content=improved_draft)]
     }
 
-@evolve()
-@track_node()
+
+
 def brand_guidelines_node(state: AgentState):
     logger.info("Brand guidelines node started")
 
@@ -179,7 +164,7 @@ def brand_guidelines_node(state: AgentState):
 
 
 
-@track_node()
+
 def plan_node(state: AgentState):
     logger.info("Plan node started")
     plan = create_plan(state['messages'])
@@ -187,7 +172,7 @@ def plan_node(state: AgentState):
     return {"plan": plan}
 
 
-@track_node()
+
 def research_plan_node(state: AgentState):
     logger.info("Research plan node started")
     
@@ -197,7 +182,7 @@ def research_plan_node(state: AgentState):
     return {"research": research}
 
 
-@track_node()
+
 def generation_node(state: AgentState):
     logger.info("Generation node started")
     
@@ -216,8 +201,6 @@ def generation_node(state: AgentState):
     }
 
 
-
-@track_node()
 def route_from_orchestrator(state):
     logger.info(f"Routing from orchestrator with state: {state}")
     intent = state["intent"]
@@ -263,6 +246,10 @@ builder.add_edge("planner", "research_plan")
 builder.add_edge("research_plan", "generate")
 builder.add_edge("generate", END)
 
+tracer = enable_trace_tracing(
+    database_path=db_path,
+    project_root='/Users/praveenkoka/koka/tril/agent_evolution/agent_rl/backend'
+)
 
 graph = builder.compile(checkpointer=memory)
 

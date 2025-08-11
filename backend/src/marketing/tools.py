@@ -7,14 +7,14 @@ from pydantic import BaseModel
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from tavily import TavilyClient
-from .imports import evolve
+
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 # Initialize model and clients
-model = ChatOpenAI(model="gpt-4o", temperature=0.2)
+model = ChatOpenAI(model=os.environ.get("OPENAI_MODEL", "gpt-5"), temperature=0.2)
 tavily = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
 
 #@evolve()
@@ -32,7 +32,8 @@ Make this more engaging and add a call to action. - Intent: improve_and_rewrite_
 What is the weather in Tokyo? - Intent: other
 "
 
-Respond with just the category name: either "research_and_write", "improve_and_rewrite_draft", or "other"."""
+Respond with just the category name: either "research_and_write", "improve_and_rewrite_draft", or "other".
+"""
 
 CHATBOT_PROMPT = """You are a helpful and friendly chatbot assistant.
 Engage in natural conversation with the user, answer their questions, provide information, 
@@ -232,7 +233,7 @@ def improve_draft(messages: List, existing_draft: str = "") -> str:
     
     return response.content
 
-@evolve()
+
 def generate_fibbonacci_sequence(n: int) -> List[int]:
     """Generate a Fibonacci sequence of length n"""
     sequence = [0, 1]

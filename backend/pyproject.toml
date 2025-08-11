@@ -29,8 +29,6 @@ dependencies = [
 ]
 
 
-[project.optional-dependencies]
-dev = ["mypy>=1.11.1", "ruff>=0.6.1"]
 
 [build-system]
 requires = ["setuptools>=73.0.0", "wheel"]
@@ -72,12 +70,7 @@ convention = "google"
 
 
 [tool.poetry.dependencies]
+python = "^3.11"
 agent-evolve = {develop = true}
-[dependency-groups]
-dev = [
-    "anyio>=4.7.0",
-    "langgraph-cli[inmem]>=0.2.8",
-    "mypy>=1.13.0",
-    "pytest>=8.3.5",
-    "ruff>=0.8.2",
-]
+
+

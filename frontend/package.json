@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "dev": "concurrently \"turbo dev --filter=web\" \"turbo dev --filter=agents\"",
+    "dev:web": "turbo dev --filter=web",
     "build": "turbo build",
     "turbo:command": "turbo",
     "format": "turbo format",

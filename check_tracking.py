@@ -4,9 +4,10 @@ Check tracking database status
 """
 import sqlite3
 import os
+from agent_evolve.config import DEFAULT_DB_PATH
 
 # Check the tracker database
-db_path = 'backend/data/tracker.db'
+db_path = DEFAULT_DB_PATH
 print(f'Checking database at: {os.path.abspath(db_path)}')
 
 if os.path.exists(db_path):

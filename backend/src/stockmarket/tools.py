@@ -64,7 +64,7 @@ def get_basic_stock_info(ticker: str) -> pd.DataFrame:
     })
     return basic_info
 
-@evolve()
+
 @tool
 def get_fundamental_analysis(ticker: str, period: str = '1y') -> pd.DataFrame:
     """
