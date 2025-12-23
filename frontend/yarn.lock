@@ -4927,7 +4927,7 @@ __metadata:
     "@langchain/anthropic": ^0.3.15
     "@langchain/cohere": ^0.3.2
     "@langchain/community": ^0.3.35
-    "@langchain/core": ^0.3.42
+    "@langchain/core": ^0.3.80
     "@langchain/langgraph": ^0.2.55
     "@langchain/mongodb": ^0.1.0
     "@langchain/openai": ^0.4.4
@@ -12988,7 +12988,7 @@ __metadata:
   resolution: "web@workspace:apps/web"
   dependencies:
     "@eslint/js": ^9.19.0
-    "@langchain/core": ^0.3.42
+    "@langchain/core": ^0.3.80
     "@langchain/langgraph": ^0.2.55
     "@langchain/langgraph-api": ^0.0.16
     "@langchain/langgraph-cli": ^0.0.16
