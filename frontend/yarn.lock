@@ -9106,6 +9106,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash@npm:^4.17.23":
+  version: 4.17.23
+  resolution: "lodash@npm:4.17.23"
+  checksum: 7daad39758a72872e94651630fbb54ba76868f904211089721a64516ce865506a759d9ad3d8ff22a2a49a50a09db5d27c36f22762d21766e47e3ba918d6d7bab
+  languageName: node
+  linkType: hard
+
 "logform@npm:^2.2.0, logform@npm:^2.7.0":
   version: 2.7.0
   resolution: "logform@npm:2.7.0"
@@ -13020,7 +13027,7 @@ __metadata:
     framer-motion: ^12.4.9
     globals: ^15.14.0
     katex: ^0.16.21
-    lodash: ^4.17.21
+    lodash: ^4.17.23
     lucide-react: ^0.476.0
     next: ^15.2.3
     next-themes: ^0.4.4
